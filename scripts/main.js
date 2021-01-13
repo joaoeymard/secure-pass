@@ -58,7 +58,7 @@ function exportData() {
     data: encrypted(dataStr),
   };
 
-  window.exportFromJSON({ data, fileName: "segurepass", exportType: "json" });
+  window.exportFromJSON({ data, fileName: "securepass", exportType: "json" });
 }
 
 // Funções uteis

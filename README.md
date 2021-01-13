@@ -1,4 +1,4 @@
-# Segure Pass
+# Secure Pass
 
 Um Projeto responsivo simples de gerenciador de senhas.
 
