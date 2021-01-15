@@ -23,9 +23,6 @@
         <div class="collapse navbar-collapse" id="menu-principal">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mdl-secret-details">Novo</a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mdl-config">Configurações</a>
             </li>
             <li class="nav-item">
@@ -36,13 +33,26 @@
       </div>
     </nav>
 
+    <section class="container mb-4">
+
+      <span>Filtros:</span>
+      <form class="input-group" v-on:submit.prevent="search_secret">
+        <input type="search" name="search" class="form-control border-end-0 border-secondary" autocomplete="off">
+        <button type="submit" class="btn btn-outline-secondary border-start-0">Pesquisar</button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+          data-bs-target="#mdl-secret-details">Novo</button>
+      </form>
+
+    </section>
+
     <section class="container mb-5">
 
+      <span>Resultados:</span>
       <div id="list-secrets" class="accordion">
 
         <div class="accordion-item" v-for="(s, ind) in secrets">
           <h2 v-bind:id="'secret-title' + ind" class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse"
               v-bind:data-bs-target="'#secret-details' + ind" aria-expanded="true">
               {{ s.title }}
             </button>
@@ -63,6 +73,17 @@
                   <span>Segredo:</span>
                   <textarea rows="4" class="form-control form-control-sm" v-bind:value="s.content || s.secret"
                     readonly></textarea>
+                </div>
+
+                <div class="col-6" v-if="s.created_at">
+                  <span>Criado em:</span>
+                  <input type="text" class="form-control form-control-sm"
+                    v-bind:value="new Date(s.created_at).toLocaleString()" readonly>
+                </div>
+                <div class="col-6" v-if="s.updated_at">
+                  <span>Atualizado em:</span>
+                  <input type="text" class="form-control form-control-sm"
+                    v-bind:value="new Date(s.updated_at).toLocaleString()" readonly>
                 </div>
               </div>
 
@@ -109,22 +130,13 @@
                 <textarea name="secret" class="form-control form-control-sm" rows="4"
                   v-bind:value="secret.content"></textarea>
               </div>
-
-              <div class="col-6" v-if="secret.created_at">
-                <span>Criado em:</span>
-                <input type="text" class="form-control form-control-sm"
-                  v-bind:value="new Date(secret.created_at).toLocaleString()" readonly>
-              </div>
-              <div class="col-6" v-if="secret.updated_at">
-                <span>Atualizado em:</span>
-                <input type="text" class="form-control form-control-sm"
-                  v-bind:value="new Date(secret.updated_at).toLocaleString()" readonly>
-              </div>
             </div>
 
           </div>
           <div class="modal-footer border-0 flex-row-reverse">
-            <button type="submit" class="btn btn-sm btn-primary px-3">Salvar</button>
+            <button type="submit" class="btn btn-sm btn-primary px-3 ms-auto">Salvar</button>
+            <button type="button" class="btn btn-sm btn-danger px-3" v-if="secret.id"
+              v-on:click="remove_secret">Deletar</button>
           </div>
         </div>
       </form>
@@ -157,7 +169,7 @@
                 <div class="input-group mb-3">
                   <input name="hash" type="text" class="form-control form-control-sm" maxlength="256"
                     v-bind:value="config.hash || ''">
-                  <button class="btn btn-sm btn-outline-secondary" type="button" v-on:click="gerarHash">Gerar
+                  <button class="btn btn-sm btn-outline-secondary" type="button" v-on:click="gerar_hash">Gerar
                     aleatório</button>
                 </div>
               </div>
@@ -223,6 +235,12 @@
 
           bsMdlSecretDetails.show();
         },
+        remove_secret: function () {
+          const findIndex = storageSecrets.filter().findIndex(s => s.id === this.secret.id);
+
+          storageSecrets.remove(findIndex);
+          bsMdlSecretDetails.hide();
+        },
         show_secret: async function (secret) {
           if (secret.content) {
             delete secret.content;
@@ -232,10 +250,15 @@
 
           this.$forceUpdate();
         },
-        gerarHash: function () {
+        gerar_hash: function () {
           this.config.hash = randPassword(128);
 
           this.$forceUpdate();
+        },
+        search_secret: function (ev) {
+          const $search = ev.target.querySelector('input[name=search]');
+
+          this.secrets = filter_list($search.value);
         }
       }
     });
@@ -281,6 +304,18 @@
     $formSecretDetails.parentElement.addEventListener('hidden.bs.modal', function () {
       v.secret = {}
     })
+
+    function filter_list(str) {
+      const regex = new RegExp(str, 'ig');
+      const arrTags = tag => tag.split(',').map(e => e.trim())
+
+      return storageSecrets.filter(
+        s => (
+          regex.test(s.title)
+          || arrTags(s.tags).findIndex(t => regex.test(t)) >= 0
+        )
+      )
+    }
 
     window.onload = async () => {
       if (!Array.isArray(storageSecrets.filter())) {
