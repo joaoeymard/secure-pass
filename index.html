@@ -47,12 +47,39 @@
       </div>
     </nav>
 
-    <section class="bg-white mb-5 py-3">
+    <div class="container my-5" v-show="false">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="container my-5" style="display: none" v-show="!storageConfig.find() || !storageConfig.find().hash">
+      <div class="card card-body p-3 p-sm-5 text-center text-secondary">
+        <h3 class="mb-4">- Segure Pass -</h3>
+        <p>
+          Essa é uma ferramenta que tem como objetivo guardar seus segredos localmente.<br />
+          Um segredo pode ser uma senha, token, credenciais de acesso, variáveis de ambiente ou qualquer texto do seu
+          interesse.
+        </p>
+
+        <p class="mt-3 mb-2">
+          Para iniciar, crie um código de critografia ou importe seus dados no menu de configurações.
+        </p>
+
+        <button class="btn btn-sm btn-outline-primary px-3 mx-auto" style="width: fit-content;" data-bs-toggle="modal"
+          data-bs-target="#mdl-config">Abrir as configurações</button>
+      </div>
+    </section>
+
+    <section class="bg-white mb-5 py-3" style="display: none"
+      v-show="storageConfig.find() && storageConfig.find().hash">
 
       <div class="container">
         <div class="row g-2 align-items-center">
           <div class="col-3 col-sm-2">
-            <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal"
+            <button type="button" class="btn btn-sm btn-primary w-100 pulse" data-bs-toggle="modal"
               data-bs-target="#mdl-secret-details">
               Novo
             </button>
@@ -70,9 +97,15 @@
 
     </section>
 
-    <section class="container mb-5">
-
+    <section class="container mb-5" style="display: none" v-show="storageConfig.find() && storageConfig.find().hash">
       <div id="list-secrets" class="accordion accordion-flush py-3 p-sm-4 bg-white">
+
+        <div class="text-center" v-if="secrets.length == 0">
+          <p class="mb-3">Nenhum segredo encontrado.</p>
+
+          <button class="btn btn-sm btn-outline-primary px-3 mx-auto" style="width: fit-content;" data-bs-toggle="modal"
+            data-bs-target="#mdl-secret-details">Adicionar um segredo</button>
+        </div>
 
         <div class="accordion-item" v-for="(s, ind) in secrets">
           <h2 v-bind:id="'secret-title' + ind" class="accordion-header">
@@ -123,7 +156,6 @@
         </div>
 
       </div>
-
     </section>
 
     <div id="mdl-secret-details" class="modal" tabindex="-1">
@@ -331,7 +363,7 @@
           storageConfig.clear();
           storageSecrets.clear();
 
-          this.gerar_hash();
+          bsMdlConfig.hide();
           notyf.success('Seus dados foram apagados');
         }
       }
@@ -349,17 +381,21 @@
       el.target.reset();
 
       bsMdlSecretDetails.hide();
+      notyf.success('Segredo salvo.');
     })
     $formConfig.addEventListener('submit', async function (el) {
       el.preventDefault();
 
       storageConfig.data = v.config = serialize.formConfig();
-      el.target.reset();
 
       bsMdlConfig.hide();
+      notyf.success('Configuração salva.');
     })
 
     $formConfig.parentElement.addEventListener('shown.bs.modal', function (ev) {
+      ev.target.querySelector('input').focus();
+    })
+    $formSecretDetails.parentElement.addEventListener('shown.bs.modal', function (ev) {
       ev.target.querySelector('input').focus();
     })
     $formConfig.querySelector('#import-secret').addEventListener('change', async function (ev) {
@@ -383,9 +419,6 @@
         ev.target.value = '';
       }
     })
-    $formSecretDetails.parentElement.addEventListener('shown.bs.modal', function (ev) {
-      ev.target.querySelector('input').focus();
-    })
     $formSecretDetails.parentElement.addEventListener('hidden.bs.modal', function () {
       v.secret = {}
     })
@@ -407,10 +440,8 @@
         storageSecrets.data = [];
       }
 
-      v.secrets = storageSecrets.filter();
-      v.config = storageConfig.find() || {
-        hash: randPassword(variables.default_hash_lenght)
-      };
+      v.secrets = filter_list('');
+      v.config = storageConfig.find() || {};
     }
   </script>
 </body>
