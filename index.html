@@ -6,13 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secure Pass</title>
 
-  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="assets/notyf/notyf.min.css">
   <link rel="stylesheet" href="styles/style.css">
 </head>
 
-<body>
+<body class="bg-light">
   <main>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-5">
+    <nav class="navbar navbar-expand-sm navbar-dark py-3">
       <div class="container">
         <span class="navbar-brand mb-0">SecurePass</span>
 
@@ -23,32 +24,55 @@
         <div class="collapse navbar-collapse" id="menu-principal">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mdl-config">Configurações</a>
+              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#mdl-config">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-gear-fill mb-1" viewBox="0 0 16 16">
+                  <path
+                    d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
+                </svg>
+                Configurações
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://github.com/JoaoEymard/secure-pass">Github</a>
+              <a class="nav-link" href="https://github.com/JoaoEymard/secure-pass" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                  class="bi bi-github mb-1" viewBox="0 0 16 16">
+                  <path
+                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                </svg>
+              </a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
 
-    <section class="container mb-4">
+    <section class="bg-white mb-5 py-3">
 
-      <span>Filtros:</span>
-      <form class="input-group" v-on:submit.prevent="search_secret">
-        <input type="search" name="search" class="form-control border-end-0 border-secondary" autocomplete="off">
-        <button type="submit" class="btn btn-outline-secondary border-start-0">Pesquisar</button>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-          data-bs-target="#mdl-secret-details">Novo</button>
-      </form>
+      <div class="container">
+        <div class="row g-2 align-items-center">
+          <div class="col-3 col-sm-2">
+            <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal"
+              data-bs-target="#mdl-secret-details">
+              Novo
+            </button>
+          </div>
+          <div class="col-9 col-sm-4 offset-sm-6">
+            <form class="input-group input-group-sm" v-on:submit.prevent="search_secret">
+              <input type="search" name="search" class="form-control border-end-0 border-secondary" autocomplete="off">
+              <button type="submit" class="btn btn-outline-secondary border-start-0">
+                Buscar
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
 
     </section>
 
     <section class="container mb-5">
 
-      <span>Resultados:</span>
-      <div id="list-secrets" class="accordion">
+      <div id="list-secrets" class="accordion accordion-flush py-3 p-sm-4 bg-white">
 
         <div class="accordion-item" v-for="(s, ind) in secrets">
           <h2 v-bind:id="'secret-title' + ind" class="accordion-header">
@@ -104,8 +128,8 @@
 
     <div id="mdl-secret-details" class="modal" tabindex="-1">
       <form class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header">
+        <div class="modal-content p-3 p-sm-4">
+          <div class="modal-header border-0">
             <h5 class="modal-title">Detalhes do segredo</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -117,17 +141,17 @@
                 <input name="title" type="text" class="form-control form-control-sm" maxlength="64"
                   v-bind:value="secret.title">
               </div>
-              <div class="col-6">
-                <span>Link/Host:</span>
+              <div class="col-12 col-sm-6">
+                <span>Link / Host:</span>
                 <input name="link" type="text" class="form-control form-control-sm" v-bind:value="secret.link">
               </div>
-              <div class="col-6">
+              <div class="col-12 col-sm-6">
                 <span>Tags:</span>
                 <input name="tags" type="text" class="form-control form-control-sm" v-bind:value="secret.tags">
               </div>
               <div class="col-12">
                 <span>Segredo:</span>
-                <textarea name="secret" class="form-control form-control-sm" rows="4"
+                <textarea name="secret" class="form-control form-control-sm" rows="6"
                   v-bind:value="secret.content"></textarea>
               </div>
             </div>
@@ -144,8 +168,8 @@
 
     <div id="mdl-config" class="modal" tabindex="-1">
       <form class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header">
+        <div class="modal-content p-3 p-sm-4">
+          <div class="modal-header border-0">
             <h5 class="modal-title">Configurações</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -153,35 +177,68 @@
 
             <div class="row g-3">
               <div class="col-12">
-                <span>Importar dados:</span>
-                <input type="file" class="form-control form-control-sm">
+                <div class="mb-4">
+                  <span>Hash criptográfico:</span>
+                  <div class="input-group">
+                    <input name="hash" type="text" class="form-control form-control-sm" maxlength="256"
+                      v-bind:value="config.hash || ''">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" v-on:click="gerar_hash">Gerar
+                      aleatório</button>
+                  </div>
+                  <small class="text-secondary">
+                    Nós usamos esse código para criptografar e descriptografar seus segredos, guarde com segurança.
+                  </small>
+                </div>
+
+                <div class="d-flex flex-row-reverse">
+                  <button type="submit" class="btn btn-sm btn-primary px-3 ms-auto">Salvar</button>
+                </div>
               </div>
 
               <div class="col-12">
-                <div class="text-center" style="z-index: 99;">
-                  <span class="bg-white px-3">ou</span>
-                </div>
-                <hr style="margin-top: -12px; opacity: 1; background-color: #c8c9ca;">
+                <hr>
               </div>
 
-              <div class="col-12">
-                <span>Hash criptográfico:</span>
-                <div class="input-group mb-3">
-                  <input name="hash" type="text" class="form-control form-control-sm" maxlength="256"
-                    v-bind:value="config.hash || ''">
-                  <button class="btn btn-sm btn-outline-secondary" type="button" v-on:click="gerar_hash">Gerar
-                    aleatório</button>
+              <div class="d-flex align-items-center my-2">
+                <div class="col-9">
+                  <p class="m-0 p-0 fs-5">Importar dados</p>
+                  <small class="text-secondary">
+                    Recupere seus secredos previamente salvos.
+                  </small>
+                </div>
+                <div class="col-3">
+                  <label for="import-secret" class="btn btn-sm btn-outline-secondary d-block ms-auto"
+                    style="width: fit-content;">Importar</label>
+                  <input id="import-secret" type="file" class="form-control form-control-sm" hidden>
                 </div>
               </div>
+              <div class="d-flex align-items-center my-2">
+                <div class="col-9">
+                  <p class="m-0 p-0 fs-5">Exportar dados</p>
+                  <small class="text-secondary">
+                    Salvar seus secredos.
+                  </small>
+                </div>
+                <div class="col-3">
+                  <button type="button" class="btn btn-sm btn-outline-secondary d-block ms-auto"
+                    onclick="exportData()">Exportar</button>
+                </div>
+              </div>
+              <div class="d-flex align-items-center my-2">
+                <div class="col-9">
+                  <p class="m-0 p-0 fs-5">Apagar dados</p>
+                  <small class="text-secondary">
+                    Essa ação irá apagar permanentemente seus secredos.
+                  </small>
+                </div>
+                <div class="col-3">
+                  <button type="button" class="btn btn-sm btn-danger d-block ms-auto"
+                    v-on:click="drop_database()">Apagar</button>
+                </div>
+              </div>
+
             </div>
 
-          </div>
-          <div class="modal-footer border-0 flex-row-reverse">
-            <button type="submit" class="btn btn-sm btn-primary px-3">Salvar</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportData()">Exportar
-              dados</button>
-            <button type="button" class="btn btn-sm btn-danger me-auto" onclick="storageSecrets.clear()">Limpar
-              lista</button>
           </div>
         </div>
       </form>
@@ -189,13 +246,19 @@
   </main>
 
   <script src="assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/notyf/notyf.min.js"></script>
   <script src="assets/export-from-json.min.js"></script>
   <script src="assets/crypto-js.min.js"></script>
   <script src="assets/vue.min.js"></script>
   <script src="assets/storage.js"></script>
+
+  <script src="scripts/variables.js"></script>
   <script src="scripts/main.js"></script>
 
   <script>
+    // Create an instance of Notyf 
+    const notyf = new Notyf();
+
     const v = new Vue({
       el: 'main',
       data: {
@@ -226,6 +289,7 @@
           }
 
           bsMdlSecretDetails.hide();
+          notyf.success('Segredo salvo.')
         },
         edit_secret: function (secret) {
           this.secret = {
@@ -240,6 +304,8 @@
 
           storageSecrets.remove(findIndex);
           bsMdlSecretDetails.hide();
+
+          notyf.success('Segredo removido.')
         },
         show_secret: async function (secret) {
           if (secret.content) {
@@ -250,15 +316,23 @@
 
           this.$forceUpdate();
         },
-        gerar_hash: function () {
-          this.config.hash = randPassword(128);
-
-          this.$forceUpdate();
-        },
         search_secret: function (ev) {
           const $search = ev.target.querySelector('input[name=search]');
 
           this.secrets = filter_list($search.value);
+        },
+
+        gerar_hash: function () {
+          this.config.hash = randPassword(variables.default_hash_lenght);
+
+          this.$forceUpdate();
+        },
+        drop_database: function () {
+          storageConfig.clear();
+          storageSecrets.clear();
+
+          this.gerar_hash();
+          notyf.success('Seus dados foram apagados');
         }
       }
     });
@@ -288,15 +362,26 @@
     $formConfig.parentElement.addEventListener('shown.bs.modal', function (ev) {
       ev.target.querySelector('input').focus();
     })
-    $formConfig.querySelector('input[type=file]').addEventListener('change', async function (ev) {
-      const { data, ...config } = JSON.parse(
-        await getFileReader(ev.target.files[0])
-      );
+    $formConfig.querySelector('#import-secret').addEventListener('change', async function (ev) {
+      try {
 
-      v.config = storageConfig.data = config;
-      storageSecrets.data = JSON.parse(decrypted(data));
+        const { data, ...config } = JSON.parse(
+          await getFileReader(ev.target.files[0])
+        );
 
-      bsMdlConfig.hide();
+        v.config = storageConfig.data = config;
+        storageSecrets.data = JSON.parse(decrypted(data));
+
+        notyf.success('Segredos importados com sucesso');
+
+        bsMdlConfig.hide();
+
+      } catch (error) {
+        console.log(error);
+        notyf.error(error.message || 'Falha ao carregar seus segredos');
+      } finally {
+        ev.target.value = '';
+      }
     })
     $formSecretDetails.parentElement.addEventListener('shown.bs.modal', function (ev) {
       ev.target.querySelector('input').focus();
@@ -322,12 +407,10 @@
         storageSecrets.data = [];
       }
 
-      if (!storageConfig.find() || !storageConfig.find().hash) {
-        bsMdlConfig.show();
-      }
-
       v.secrets = storageSecrets.filter();
-      v.config = storageConfig.find() || {};
+      v.config = storageConfig.find() || {
+        hash: randPassword(variables.default_hash_lenght)
+      };
     }
   </script>
 </body>

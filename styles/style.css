@@ -1,3 +1,15 @@
+:root {
+  --clr-primary-dark: #00296b;
+  --clr-primary: #003f88;
+  --clr-white: #fffcff;
+  --clr-secondary-dark: #fdc500;
+  --clr-secondary: #ffd500;
+}
+
+.navbar {
+  background-color: var(--clr-primary) !important;
+}
+
 .accordion-button:focus {
   box-shadow: inherit;
 }
