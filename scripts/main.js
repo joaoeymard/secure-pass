@@ -27,9 +27,17 @@ const serialize = {
   formConfig: () => {
     const $form = document.querySelector("#mdl-config form");
     const $hash = $form.querySelector("input[name=hash]");
+    const $auto_secret_lenght = $form.querySelector(
+      "input[name=auto_secret_lenght]"
+    );
+    const $limit_view_secret_sec = $form.querySelector(
+      "input[name=limit_view_secret_sec]"
+    );
 
     return {
       hash: $hash.value,
+      auto_secret_lenght: parseInt($auto_secret_lenght.value),
+      limit_view_secret_sec: parseInt($limit_view_secret_sec.value),
     };
   },
 };
@@ -38,14 +46,14 @@ const getFileReader = (file) =>
   new Promise((resolve, reject) => {
     try {
       const reader = new FileReader();
-      // reader.readAsDataURL(file);
+      reader.readAsText(file);
+
       reader.onload = function () {
         resolve(reader.result);
       };
       reader.onerror = function () {
         reject(reader.error);
       };
-      reader.readAsText(file);
     } catch (error) {
       reject(error);
     }

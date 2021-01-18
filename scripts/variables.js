@@ -1,6 +1,10 @@
 const variables = {
-  product_name: "Segure Pass",
-  version: "0.0.1",
+  product: {
+    name: "Segure Pass",
+    version: "1.0.1",
+  },
 
-  default_hash_lenght: 128,
+  hash_lenght: 128,
+  auto_secret_lenght: 32,
+  limit_view_secret_sec: 5,
 };
