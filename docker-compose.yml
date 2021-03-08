@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  front:
+    read_only: false
+    hostname: securepass-nx
+    container_name: securepass-nx
+    build:
+      context: ./
+      dockerfile: Dockerfile.nginx
+    env_file:
+      - ./.env.front
+    volumes:
+      - ${NGINX_FILE:-./securepass.joaoeymard.dev.template}:/etc/default/securepass.joaoeymard.dev.template
+      - ${NGINX_PATH-./}:/project/
+
+  webservice:
+    read_only: false
+    hostname: securepass-ws
+    container_name: securepass-ws
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ${BUILD_PATH-./build/}:/project/
+
+networks:
+  default:
+    external:
+      name: server
