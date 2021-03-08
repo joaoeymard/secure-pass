@@ -1,0 +1,39 @@
+server {
+  listen 443 ssl;
+
+  server_name $NGINX_HOST;
+  root $ROOT_PATH;
+
+  # SSL
+  ssl_certificate $NGINX_CRT;
+  ssl_certificate_key $NGINX_KEY;
+
+  # security
+  include security.conf;
+}
+
+# subdomains redirect
+server {
+  listen 443 ssl;
+
+  server_name *.$NGINX_HOST;
+
+  # SSL
+  ssl_certificate $NGINX_CRT;
+  ssl_certificate_key $NGINX_KEY;
+
+  return 301 https://$NGINX_HOST$request_uri;
+}
+
+# HTTP redirect
+server {
+	listen 80;
+
+	server_name .$NGINX_HOST;
+
+	include letsencrypt.conf;
+
+	location / {
+		return 301 https://$NGINX_HOST$request_uri;
+	}
+}
