@@ -2,7 +2,6 @@
 const storageSecrets = new Storage({
   st: localStorage,
   key: "sct",
-  onChange: (strg) => (v.secrets = strg.data),
 });
 const storageConfig = new Storage({
   st: localStorage,
@@ -72,10 +71,12 @@ function exportData() {
 // Funções uteis
 const randomInteger = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
+
 const uuid = (a) =>
   a
     ? (a ^ ((Math.random() * 16) >> (a / 4))).toString(16)
     : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, uuid);
+
 const randPassword = (len) =>
   Array(len)
     .fill("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
@@ -83,9 +84,9 @@ const randPassword = (len) =>
     .join("");
 
 // Funções de criptografia
-const encrypted = (str) =>
-  CryptoJS.AES.encrypt(str, storageConfig.find().hash).toString();
-const decrypted = (str) =>
-  CryptoJS.AES.decrypt(str, storageConfig.find().hash).toString(
+const encrypted = (str, hash) =>
+  CryptoJS.AES.encrypt(str, hash || storageConfig.find().hash).toString();
+const decrypted = (str, hash) =>
+  CryptoJS.AES.decrypt(str, hash || storageConfig.find().hash).toString(
     CryptoJS.enc.Utf8
   );

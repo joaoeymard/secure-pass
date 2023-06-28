@@ -78,20 +78,34 @@
 
       <div class="container">
         <div class="row g-2 align-items-center">
-          <div class="col-3 col-sm-2">
+          <div class="col-12 col-sm-3">
             <button type="button" class="btn btn-sm btn-primary w-100 pulse" data-bs-toggle="modal"
               data-bs-target="#mdl-secret-details">
               Novo
             </button>
           </div>
-          <div class="col-9 col-sm-4 offset-sm-6">
-            <form class="input-group input-group-sm" v-on:submit.prevent="search_secret">
-              <input type="search" name="search" class="form-control border-end-0 border-secondary" autocomplete="off">
-              <button type="submit" class="btn btn-outline-secondary border-start-0">
-                Buscar
-              </button>
-            </form>
-          </div>
+          <form class="col-12 col-sm-7 offset-sm-2" v-on:submit.prevent="search_secret">
+            <div class="row g-2">
+              <div class="col-4">
+                <div class="input-group input-group-sm">
+                  <select class="form-select border-secondary" name="tag">
+                    <option value="">Tags</option>
+                    <option v-bind:value="tag" v-for="tag in tags">{{tag.toUpperCase()}}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-8">
+                <div class="input-group input-group-sm">
+                  <input type="search" name="search" class="form-control border-end-0 border-secondary"
+                    autocomplete="off">
+                  <button type="submit" class="btn btn-outline-secondary border-start-0">
+                    Buscar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -111,9 +125,12 @@
 
           <div class="accordion-item" v-for="(s, ind) in secrets">
             <h2 v-bind:id="'secret-title' + ind" class="accordion-header">
-              <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse"
+              <button class="accordion-button collapsed py-2 px-3 w-100" type="button" data-bs-toggle="collapse"
                 v-bind:data-bs-target="'#secret-details' + ind" aria-expanded="true">
-                {{ s.title }}
+                <div class="d-flex justify-content-between align-items-center w-100 me-2">
+                  <span>{{ s.title }}</span>
+                  <span class="fw-light text-muted">{{ new Date(s.updated_at).toLocaleString() }}</span>
+                </div>
               </button>
             </h2>
             <div v-bind:id="'secret-details' + ind" class="accordion-collapse collapse" data-bs-parent="#list-secrets">
@@ -148,7 +165,7 @@
 
                 <div class="d-flex flex-row-reverse">
                   <button type="button" class="btn btn-sm btn-primary px-3" v-on:click="show_secret(s)">{{
-                    s.content ? 'Ocutar Segredo' : 'Mostrar Segredo'
+                    s.content ? 'Ocultar Segredo' : 'Mostrar Segredo'
                     }}</button>
                   <button type="button" class="btn btn-sm btn-outline-secondary mx-2"
                     v-on:click="edit_secret(s)">Editar</button>
@@ -163,7 +180,7 @@
     </section>
 
     <div id="mdl-secret-details" class="modal" tabindex="-1">
-      <form class="modal-dialog modal-xl">
+      <form class="modal-dialog modal-fullscreen">
         <div class="modal-content p-3 p-sm-4">
           <div class="modal-header border-0">
             <h5 class="modal-title">Detalhes do segredo</h5>
@@ -175,21 +192,21 @@
               <div class="col-12">
                 <span>Título: <span class="text-danger">*</span></span>
                 <input name="title" type="text" class="form-control form-control-sm" maxlength="64"
-                  v-bind:value="secret.title" required>
+                  v-model="secret.title" required>
               </div>
               <div class="col-12 col-sm-6">
                 <span>Link / Host:</span>
-                <input name="link" type="text" class="form-control form-control-sm" v-bind:value="secret.link">
+                <input name="link" type="text" class="form-control form-control-sm" v-model="secret.link">
               </div>
               <div class="col-12 col-sm-6">
                 <span>Tags:</span>
-                <input name="tags" type="text" class="form-control form-control-sm" v-bind:value="secret.tags">
+                <input name="tags" type="text" class="form-control form-control-sm" v-model="secret.tags">
               </div>
               <div class="col-12">
                 <span>Segredo: <span class="text-danger">*</span></span>
                 <a href="#" class="float-end text-decoration-none" v-on:click.prevent="gerar_secret_auto()">Gerar
                   Automaticamente</a>
-                <textarea name="secret" class="form-control form-control-sm" rows="6" v-bind:value="secret.content"
+                <textarea name="secret" class="form-control form-control-sm" rows="6" v-model="secret.content"
                   required></textarea>
               </div>
             </div>
@@ -315,54 +332,97 @@
     // Create an instance of Notyf 
     const notyf = new Notyf();
 
+    const stSecretSave = (content) => {
+      try {
+        storageSecrets.push({
+          id: uuid(),
+          ...content,
+          created_at: Date.now(),
+          updated_at: Date.now(),
+        });
+
+        notyf.success('Segredo salvo com sucesso.');
+      } catch (error) {
+        notyf.error('<b>Erro!</b><br>' + error.message);
+        console.log('[stSecretSave]', error);
+      }
+    }
+
+    const stSecretUpdate = (id, content) => {
+      try {
+        storageSecrets.map((s) => s.id === id ? ({
+          ...s,
+          ...content,
+          updated_at: Date.now(),
+        }) : s);
+
+        notyf.success('Segredo atualizado com sucesso.');
+      } catch (error) {
+        notyf.error('<b>Erro!</b><br>' + error.message);
+        console.log('[stSecretUpdate]', error);
+      }
+    }
+
+    const stSecretDelete = (id) => {
+      try {
+        indSecret = storageSecrets.data.findIndex((s) => s.id === id);
+        storageSecrets.remove(indSecret);
+
+        notyf.success('Segredo excluído com sucesso.');
+      } catch (error) {
+        notyf.error('<b>Erro!</b><br>' + error.message);
+        console.log('[stSecretDelete]', error);
+      }
+    }
+
+    const stConfigSave = (content) => {
+      try {
+        storageConfig.data = {
+          ...variables,
+          ...content,
+        };
+
+        notyf.success('Configurações salvas com sucesso.');
+      } catch (error) {
+        notyf.error('<b>Erro!</b><br>' + error.message);
+        console.log('[stConfigSave]', error);
+      }
+    }
+
+    const stGetTags = () => [...new Set([].concat(...storageSecrets.data.map(s => s.tags.toLowerCase().split(','))))]
+
     const v = new Vue({
       el: 'main',
       data: {
+        tags: stGetTags(),
         secrets: [],
         secret: {},
         config: {},
       },
       methods: {
         save_secret: async function () {
-          const secret = {
-            ...this.secret,
-            ...serialize.formSecretDetails(),
-          };
-          delete secret.content;
-
-          if (secret.id) {
-            storageSecrets.map((s) => s.id === secret.id ? {
-              ...secret,
-              updated_at: Date.now(),
-            } : s);
-
-            notyf.success('Segredo atualizado.');
+          if (!this.secret.id) {
+            stSecretSave(serialize.formSecretDetails());
           } else {
-            storageSecrets.push({
-              ...secret,
-              id: uuid(),
-              created_at: Date.now(),
-              updated_at: Date.now(),
-            });
-
-            notyf.success('Segredo salvo.');
+            stSecretUpdate(this.secret.id, serialize.formSecretDetails());
           }
+
+          this.search_secret();
         },
-        edit_secret: function (secret) {
+        remove_secret: function () {
+          stSecretDelete(this.secret.id);
+          bsMdlSecretDetails.hide();
+
+          this.search_secret();
+        },
+        edit_secret: function ({ id }) {
+          const stSecret = storageSecrets.find((s) => s.id === id)
           this.secret = {
-            ...secret,
-            content: decrypted(secret.secret)
+            ...stSecret,
+            content: decrypted(stSecret.secret)
           };
 
           bsMdlSecretDetails.show();
-        },
-        remove_secret: function () {
-          const findIndex = storageSecrets.filter().findIndex(s => s.id === this.secret.id);
-
-          storageSecrets.remove(findIndex);
-          bsMdlSecretDetails.hide();
-
-          notyf.success('Segredo removido.')
         },
         show_secret: async function (secret) {
           if (secret.content) {
@@ -374,32 +434,43 @@
 
           this.$forceUpdate();
         },
-        search_secret: function (ev) {
-          const $search = ev.target.querySelector('input[name=search]');
+        search_secret: function () {
+          const $search = document.querySelector('input[name=search]');
+          const $tag = document.querySelector('select[name=tag]');
 
-          this.secrets = filter_list($search.value);
+          const regex = new RegExp($search.value, 'ig');
+          const arrTags = tag => tag.split(',').map(e => e.trim())
+
+          this.secrets = storageSecrets.filter(
+            s => (
+              regex.test(s.title) &&
+              (!$tag.value || s.tags.split(',').some(t => t.trim().toLowerCase() === $tag.value.trim().toLowerCase()))
+            )
+          );
+
+          this.tags = stGetTags();
         },
 
         gerar_secret_auto: function () {
           this.secret = {
-            ...serialize.formSecretDetails(),
-            content: randPassword(this.config.auto_secret_lenght),
+            ...this.secret,
+            content: randPassword(this.config.auto_secret_lenght)
           };
         },
         gerar_hash: function () {
           this.config = {
-            ...serialize.formConfig(),
             ...this.config,
             hash: randPassword(this.config.hash_lenght),
-          };
+          }
         },
+
         drop_database: function () {
           storageConfig.clear();
           storageSecrets.clear();
 
-          window.onload();
           bsMdlConfig.hide();
-          notyf.success('Seus dados foram apagados');
+          notyf.success('Banco de dados apagado com sucesso.');
+          window.onload();
         }
       }
     });
@@ -409,48 +480,52 @@
     const $formConfig = document.querySelector('#mdl-config form');
     const bsMdlConfig = new bootstrap.Modal($formConfig.parentElement);
 
-    $formSecretDetails.addEventListener('submit', async function (el) {
-      el.preventDefault();
-
-      await v.save_secret();
-      el.target.reset();
-
-      bsMdlSecretDetails.hide();
-    })
     $formConfig.addEventListener('submit', async function (el) {
       el.preventDefault();
 
-      storageConfig.data = v.config = {
-        ...v.config,
-        ...serialize.formConfig(),
-      };
-
+      stConfigSave(serialize.formConfig());
+      v.config = storageConfig.data;
       bsMdlConfig.hide();
-      notyf.success('Configuração salva.');
     })
-
     $formConfig.parentElement.addEventListener('shown.bs.modal', function (ev) {
-      ev.target.querySelector('input').focus();
-    })
-    $formSecretDetails.parentElement.addEventListener('shown.bs.modal', function (ev) {
       ev.target.querySelector('input').focus();
     })
     $formConfig.querySelector('#import-secret').addEventListener('change', async function (ev) {
       try {
 
-        const { data, product, ..._config } = JSON.parse(
+        const { data, hash } = JSON.parse(
           await getFileReader(ev.target.files[0])
         );
 
-        v.config = storageConfig.data = {
-          ...variables,
-          ..._config,
-        };
-        storageSecrets.data = JSON.parse(decrypted(data));
+        const importSecret = JSON.parse(decrypted(data, hash));
+        let count = 0;
 
-        notyf.success('Segredos importados com sucesso');
+        for (let impt of importSecret) {
+          const stSecret = storageSecrets.find((s) => s.id === impt.id);
+
+          if (!stSecret) {
+            stSecretSave({
+              ...impt,
+              secret: encrypted(decrypted(impt.secret, hash)),
+            });
+            count++;
+            continue;
+          }
+
+          if (stSecret.id && stSecret.updated_at < impt.updated_at) {
+            stSecretUpdate(stSecret.id, {
+              ...impt,
+              secret: encrypted(decrypted(impt.secret, hash)),
+            });
+            count++;
+            continue;
+          }
+        }
+
+        notyf.success('Importação realizada com sucesso. ' + count + ' segredos importados.');
 
         bsMdlConfig.hide();
+        v.search_secret();
 
       } catch (error) {
         console.log(error);
@@ -459,28 +534,27 @@
         ev.target.value = '';
       }
     })
-    $formSecretDetails.parentElement.addEventListener('hidden.bs.modal', function () {
+
+    $formSecretDetails.addEventListener('submit', async function (el) {
+      el.preventDefault();
+
+      await v.save_secret();
+      bsMdlSecretDetails.hide();
+    })
+    $formSecretDetails.parentElement.addEventListener('shown.bs.modal', function (ev) {
+      ev.target.querySelector('input').focus();
+    })
+    $formSecretDetails.parentElement.addEventListener('hidden.bs.modal', function (el) {
+      el.target.querySelector('form').reset();
       v.secret = {}
     })
-
-    function filter_list(str) {
-      const regex = new RegExp(str, 'ig');
-      const arrTags = tag => tag.split(',').map(e => e.trim())
-
-      return storageSecrets.filter(
-        s => (
-          regex.test(s.title)
-          || arrTags(s.tags).findIndex(t => regex.test(t)) >= 0
-        )
-      )
-    }
 
     window.onload = async () => {
       if (!Array.isArray(storageSecrets.filter())) {
         storageSecrets.data = [];
       }
 
-      v.secrets = filter_list('');
+      v.secrets = storageSecrets.filter() || [];
       v.config = storageConfig.find() || { ...variables };
     }
   </script>

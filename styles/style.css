@@ -13,3 +13,7 @@
 .accordion-button:focus {
   box-shadow: inherit;
 }
+
+.container {
+  max-width: 700px;
+}
