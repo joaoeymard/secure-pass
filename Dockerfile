@@ -2,6 +2,7 @@ FROM alpine:3.13.2
 
 WORKDIR /build/
 
+COPY --chown=997:993 images/ /build/images/
 COPY --chown=997:993 assets/ /build/assets/
 COPY --chown=997:993 styles/ /build/styles/
 COPY --chown=997:993 scripts/ /build/scripts/
