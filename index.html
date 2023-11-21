@@ -4,7 +4,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary Meta Tags -->
   <title>Secure Pass</title>
+  <meta name="title" content="Secure Pass" />
+  <meta name="description" content="Guarde suas senhas e segredos na segurança do seu dipositivo" />
+  <meta name="author" content="joaoeymard.dev" />
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://securepass.joaoeymard.dev/" />
+  <meta property="og:title" content="Secure Pass" />
+  <meta property="og:description" content="Guarde suas senhas e segredos na segurança do seu dipositivo" />
+  <meta property="og:image" content="https://securepass.joaoeymard.dev/images/icons/96.png" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://securepass.joaoeymard.dev/" />
+  <meta property="twitter:title" content="Secure Pass" />
+  <meta property="twitter:description" content="Guarde suas senhas e segredos na segurança do seu dipositivo" />
+  <meta property="twitter:image" content="https://securepass.joaoeymard.dev/images/icons/96.png" />
+
 
   <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.css">
   <link rel="stylesheet" href="assets/notyf/notyf.min.css">
@@ -73,7 +94,7 @@
       </div>
     </section>
 
-    <section class="bg-white shadow-sm mb-5 py-3" style="display: none"
+    <section class="bg-white shadow-sm mb-3 py-3" style="display: none"
       v-show="storageConfig.find() && storageConfig.find().hash">
 
       <div class="container">
@@ -137,11 +158,17 @@
               <div class="accordion-body">
 
                 <div class="row g-3 pt-2 pb-3">
-                  <div class="col-md-6">
+                  <div class="col-md-7">
                     <span>Link:</span>
-                    <input type="text" class="form-control form-control-sm" v-bind:value="s.link" readonly>
+                    <div class="input-group input-group-sm">
+                      <input type="text" class="form-control" v-bind:value="s.link" readonly>
+                      <button class="btn btn-outline-secondary" type="button"
+                        v-on:click="copyText(s.link)">Copiar</button>
+                      <button class="btn btn-outline-secondary" type="button"
+                        v-on:click="openLink(s.link)">Abrir</button>
+                    </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-5">
                     <span>Tags:</span>
                     <input type="text" class="form-control form-control-sm" v-bind:value="s.tags" readonly>
                   </div>
@@ -164,10 +191,13 @@
                 </div>
 
                 <div class="d-flex flex-row-reverse">
-                  <button type="button" class="btn btn-sm btn-primary px-3" v-on:click="show_secret(s)">{{
+                  <button type="button" class="btn btn-sm btn-primary px-3"
+                    v-on:click="copyText(decrypted(s.secret))">Copiar
+                    Segredo</button>
+                  <button type="button" class="btn btn-sm btn-secundary px-3 me-2" v-on:click="show_secret(s)">{{
                     s.content ? 'Ocultar Segredo' : 'Mostrar Segredo'
                     }}</button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary mx-2"
+                  <button type="button" class="btn btn-sm btn-outline-warning me-auto"
                     v-on:click="edit_secret(s)">Editar</button>
                 </div>
 
@@ -318,7 +348,7 @@
     </div>
   </main>
 
-  <script src="assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
   <script src="assets/notyf/notyf.min.js"></script>
   <script src="assets/export-from-json.min.js"></script>
   <script src="assets/crypto-js.min.js"></script>
@@ -332,7 +362,7 @@
     // Create an instance of Notyf 
     const notyf = new Notyf();
 
-    const stSecretSave = (content) => {
+    const stSecretSave = (content, hideAlert = false) => {
       try {
         storageSecrets.push({
           id: uuid(),
@@ -341,14 +371,14 @@
           updated_at: Date.now(),
         });
 
-        notyf.success('Segredo salvo com sucesso.');
+        if (!hideAlert) notyf.success('Segredo salvo com sucesso.');
       } catch (error) {
         notyf.error('<b>Erro!</b><br>' + error.message);
         console.log('[stSecretSave]', error);
       }
     }
 
-    const stSecretUpdate = (id, content) => {
+    const stSecretUpdate = (id, content, hideAlert = false) => {
       try {
         storageSecrets.map((s) => s.id === id ? ({
           ...s,
@@ -356,19 +386,19 @@
           updated_at: Date.now(),
         }) : s);
 
-        notyf.success('Segredo atualizado com sucesso.');
+        if (!hideAlert) notyf.success('Segredo atualizado com sucesso.');
       } catch (error) {
         notyf.error('<b>Erro!</b><br>' + error.message);
         console.log('[stSecretUpdate]', error);
       }
     }
 
-    const stSecretDelete = (id) => {
+    const stSecretDelete = (id, hideAlert = false) => {
       try {
         indSecret = storageSecrets.data.findIndex((s) => s.id === id);
         storageSecrets.remove(indSecret);
 
-        notyf.success('Segredo excluído com sucesso.');
+        if (!hideAlert) notyf.success('Segredo excluído com sucesso.');
       } catch (error) {
         notyf.error('<b>Erro!</b><br>' + error.message);
         console.log('[stSecretDelete]', error);
@@ -389,7 +419,9 @@
       }
     }
 
-    const stGetTags = () => [...new Set([].concat(...storageSecrets.data.map(s => s.tags.toLowerCase().split(','))))]
+    const stGetTags = () => [...new Set(
+      [].concat(...(storageSecrets.data || []).map(s => s.tags.toLowerCase().split(',')))
+    )].filter(e => e.trim())
 
     const v = new Vue({
       el: 'main',
@@ -471,6 +503,14 @@
           bsMdlConfig.hide();
           notyf.success('Banco de dados apagado com sucesso.');
           window.onload();
+        },
+
+        copyText: function (str) {
+          navigator.clipboard.writeText(str);
+          notyf.success('Texto copiado!');
+        },
+        openLink: function (str) {
+          window.open(str, '_blank');
         }
       }
     });
@@ -507,7 +547,7 @@
             stSecretSave({
               ...impt,
               secret: encrypted(decrypted(impt.secret, hash)),
-            });
+            }, true);
             count++;
             continue;
           }
@@ -516,7 +556,7 @@
             stSecretUpdate(stSecret.id, {
               ...impt,
               secret: encrypted(decrypted(impt.secret, hash)),
-            });
+            }, true);
             count++;
             continue;
           }
