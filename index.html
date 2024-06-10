@@ -110,7 +110,7 @@
             <div class="row g-2">
               <div class="col-4">
                 <div class="input-group input-group-sm">
-                  <select class="form-select border-secondary" name="tag">
+                  <select class="form-select border-secondary" name="tag" v-on:change="search_secret">
                     <option value="">Tags</option>
                     <option v-bind:value="tag" v-for="tag in tags">{{tag.toUpperCase()}}</option>
                   </select>
@@ -120,7 +120,7 @@
               <div class="col-8">
                 <div class="input-group input-group-sm">
                   <input type="search" name="search" class="form-control border-end-0 border-secondary"
-                    autocomplete="off">
+                    autocomplete="off" v-on:keyup="search_secret">
                   <button type="submit" class="btn btn-outline-secondary border-start-0">
                     Buscar
                   </button>
@@ -134,79 +134,77 @@
     </section>
 
     <section class="container mb-5" style="display: none" v-show="storageConfig.find() && storageConfig.find().hash">
-      <div class="card card-body shadow-sm py-3 p-sm-4">
-        <div class="text-center" v-if="secrets.length == 0">
-          <p class="mb-3">Nenhum segredo encontrado.</p>
+      <div class="text-center" v-if="secrets.length == 0">
+        <p class="mb-3">Nenhum segredo encontrado.</p>
 
-          <button class="btn btn-sm btn-outline-primary px-3 mx-auto" style="width: fit-content;" data-bs-toggle="modal"
-            data-bs-target="#mdl-secret-details">Adicionar um segredo</button>
-        </div>
+        <button class="btn btn-sm btn-outline-primary px-3 mx-auto" style="width: fit-content;" data-bs-toggle="modal"
+          data-bs-target="#mdl-secret-details">Adicionar um segredo</button>
+      </div>
 
-        <p class="fs-4" v-if="secrets.length > 0">Seus segredos:</p>
-        <div id="list-secrets" class="accordion accordion-flush" v-if="secrets.length > 0">
+      <p class="mb-1" v-if="secrets.length > 0">Seus {{ secrets.length }} segredos:</p>
+      <div id="list-secrets" class="accordion accordion-flush" v-if="secrets.length > 0">
 
-          <div class="accordion-item" v-for="(s, ind) in secrets">
-            <h2 v-bind:id="'secret-title' + ind" class="accordion-header">
-              <button class="accordion-button collapsed py-2 px-3 w-100" type="button" data-bs-toggle="collapse"
-                v-bind:data-bs-target="'#secret-details' + ind" aria-expanded="true">
-                <div class="d-flex justify-content-between align-items-center w-100 me-2">
-                  <span>{{ s.title }}</span>
-                  <span class="fw-light text-muted">{{ new Date(s.updated_at).toLocaleString() }}</span>
-                </div>
-              </button>
-            </h2>
-            <div v-bind:id="'secret-details' + ind" class="accordion-collapse collapse" data-bs-parent="#list-secrets">
-              <div class="accordion-body">
-
-                <div class="row g-3 pt-2 pb-3">
-                  <div class="col-md-7">
-                    <span>Link:</span>
-                    <div class="input-group input-group-sm">
-                      <input type="text" class="form-control" v-bind:value="s.link" readonly>
-                      <button class="btn btn-outline-secondary" type="button"
-                        v-on:click="copyText(s.link)">Copiar</button>
-                      <button class="btn btn-outline-secondary" type="button"
-                        v-on:click="openLink(s.link)">Abrir</button>
-                    </div>
-                  </div>
-                  <div class="col-md-5">
-                    <span>Tags:</span>
-                    <input type="text" class="form-control form-control-sm" v-bind:value="s.tags" readonly>
-                  </div>
-                  <div class="col-12">
-                    <span>Segredo:</span>
-                    <textarea rows="4" class="form-control form-control-sm" v-bind:value="s.content || s.secret"
-                      readonly></textarea>
-                  </div>
-
-                  <div class="col-6" v-if="s.created_at">
-                    <span>Criado em:</span>
-                    <input type="text" class="form-control form-control-sm"
-                      v-bind:value="new Date(s.created_at).toLocaleString()" readonly>
-                  </div>
-                  <div class="col-6" v-if="s.updated_at">
-                    <span>Atualizado em:</span>
-                    <input type="text" class="form-control form-control-sm"
-                      v-bind:value="new Date(s.updated_at).toLocaleString()" readonly>
-                  </div>
-                </div>
-
-                <div class="d-flex flex-row-reverse">
-                  <button type="button" class="btn btn-sm btn-primary px-3"
-                    v-on:click="copyText(decrypted(s.secret))">Copiar
-                    Segredo</button>
-                  <button type="button" class="btn btn-sm btn-secundary px-3 me-2" v-on:click="show_secret(s)">{{
-                    s.content ? 'Ocultar Segredo' : 'Mostrar Segredo'
-                    }}</button>
-                  <button type="button" class="btn btn-sm btn-outline-warning me-auto"
-                    v-on:click="edit_secret(s)">Editar</button>
-                </div>
-
+        <div class="accordion-item bg-transparent" v-for="(s, ind) in secrets">
+          <h2 v-bind:id="'secret-title' + ind" class="accordion-header bg-light">
+            <button class="accordion-button collapsed p-3 ps-1 w-100 bg-transparent" type="button"
+              data-bs-toggle="collapse" v-bind:data-bs-target="'#secret-details' + ind" aria-expanded="true">
+              <div>
+                <p class="m-0 p-0">{{ s.title }}</p>
+                <span class="text-muted p-0 m-0" style="font-size: small;">{{ s.tags }}</span>
               </div>
+            </button>
+          </h2>
+          <div v-bind:id="'secret-details' + ind" class="accordion-collapse collapse bg-light"
+            data-bs-parent="#list-secrets">
+            <div class="accordion-body p-1 mb-3">
+
+              <div class="row g-3 pt-0 pb-3">
+                <div class="col-md-7">
+                  <span>Link:</span>
+                  <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" v-bind:value="s.link" readonly>
+                    <button class="btn btn-outline-secondary" type="button"
+                      v-on:click="copyText(s.link)">Copiar</button>
+                    <button class="btn btn-outline-secondary" type="button" v-on:click="openLink(s.link)">Abrir</button>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <span>Tags:</span>
+                  <input type="text" class="form-control form-control-sm" v-bind:value="s.tags" readonly>
+                </div>
+                <div class="col-12">
+                  <span>Segredo:</span>
+                  <textarea rows="4" class="form-control form-control-sm" v-bind:value="s.content || s.secret"
+                    readonly></textarea>
+                </div>
+
+                <div class="col-6" v-if="s.created_at">
+                  <span>Criado em:</span>
+                  <input type="text" class="form-control form-control-sm"
+                    v-bind:value="new Date(s.created_at).toLocaleString()" readonly>
+                </div>
+                <div class="col-6" v-if="s.updated_at">
+                  <span>Atualizado em:</span>
+                  <input type="text" class="form-control form-control-sm"
+                    v-bind:value="new Date(s.updated_at).toLocaleString()" readonly>
+                </div>
+              </div>
+
+              <div class="d-flex flex-row-reverse">
+                <button type="button" class="btn btn-sm btn-primary px-3"
+                  v-on:click="copyText(decrypted(s.secret))">Copiar
+                  Segredo</button>
+                <button type="button" class="btn btn-sm btn-secundary px-3 me-2" v-on:click="show_secret(s)">{{
+                  s.content ? 'Ocultar Segredo' : 'Mostrar Segredo'
+                  }}</button>
+                <button type="button" class="btn btn-sm btn-outline-warning me-auto"
+                  v-on:click="edit_secret(s)">Editar</button>
+              </div>
+
             </div>
           </div>
-
         </div>
+
       </div>
     </section>
 
@@ -471,17 +469,16 @@
           const $search = document.querySelector('input[name=search]');
           const $tag = document.querySelector('select[name=tag]');
 
-          const regex = new RegExp($search.value, 'ig');
-          const arrTags = tag => tag.split(',').map(e => e.trim())
+          const regex = new RegExp($search.value.trim().toLowerCase(), 'ig');
+          const isTagsPresent = tags => tags.split(',')
+            .some(t => t.trim().toLowerCase() === $tag.value.trim().toLowerCase());
 
           this.secrets = storageSecrets.filter(
             s => (
               regex.test(s.title) &&
-              (!$tag.value || s.tags.split(',').some(t => t.trim().toLowerCase() === $tag.value.trim().toLowerCase()))
+              (!$tag.value || isTagsPresent(s.tags))
             )
           );
-
-          this.tags = stGetTags();
         },
 
         gerar_secret_auto: function () {
@@ -581,9 +578,6 @@
 
       await v.save_secret();
       bsMdlSecretDetails.hide();
-    })
-    $formSecretDetails.parentElement.addEventListener('shown.bs.modal', function (ev) {
-      ev.target.querySelector('input').focus();
     })
     $formSecretDetails.parentElement.addEventListener('hidden.bs.modal', function (el) {
       el.target.querySelector('form').reset();
